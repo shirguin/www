@@ -1,28 +1,62 @@
 import React from "react";
 import Header from "./components/Header";
-import Image from "./components/Image";
-import img1 from "./img/1.jpg";
+import Users from "./components/Users";
+import AddUser from "./components/AddUser";
+import axios from "axios"
 
+
+const baseurl = "https://reqres.in/api/users?page=1"
 
 class App extends React.Component {
-  text = "Help text"
+  constructor(props) {
+    super(props)
 
+    axios.get(baseurl).then((response) => {
+      this.setState({users: response.data.data})
+    })
+    this.state = {
+        users: []
+    }
+    this.addUser = this.addUser.bind(this)
+    this.deleteUser = this.deleteUser.bind(this)
+    this.editUser = this.editUser.bind(this)
+}
+  
   render() {
     return (
       <div>
-        <Header title="Шапка сайта"/>
-        <Header title="Шапка сайта!"/>
-        <Header title="Шапка сайта!!!"/>
-        <h1>{this.text}</h1>
-        <input placeholder={this.text} onClick={this.inputClick} onMouseEnter={this.mouseOver}/>
-        <p>{this.text === "Help text" ? "Yes" : "No"}</p>
-        <Image image={img1}/>
+        <Header title="Список пользователей"/>
+        <main>
+          <Users users={this.state.users} onEdit={this.editUser} onDelete={this.deleteUser}/>
+        </main>
+
+        <aside>
+          <AddUser onAdd={this.addUser}/>
+        </aside>
       </div>
     )
   }
 
-  inputClick() {console.log("Clicked")}
-  mouseOver() {console.log("MouseOver")}   
+  deleteUser(id) {
+    this.setState({
+      users: this.state.users.filter((el) => el.id !==id)
+    })
+  }
+
+  editUser(user) {
+    let allUsers = this.state.users
+    allUsers[user.id - 1] = user
+
+    this.setState({users: []}, () => {
+      this.setState({users: [...allUsers]})
+    })
+  }
+
+  addUser(user) {
+    const id = this.state.users.length + 1
+    this.setState({users:[...this.state.users, {id, ...user}]})
+  }
+  
 }
 
 export default App
